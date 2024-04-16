@@ -26,8 +26,78 @@ var context = new PubCOntext();
 //InsertMultipleAuthors();
 //BulkUpdates();
 
-EagerLoadBooksWithAuthors();
+//EagerLoadBooksWithAuthors();
 
+//Projection();
+
+//ExplicitLoadCollection();
+
+
+//FilterUsingRelatedData();
+
+
+//ModifyingRelatedDataWhenTracked();
+
+
+ModifyingRelatedDataWhenNotTracked();
+
+void ModifyingRelatedDataWhenNotTracked()
+{
+    var author = context.Authors.Include(a => a.Books)
+        .FirstOrDefault(a => a.AuthorId == 5);
+    author.Books[0].BasePrice = (decimal)12.00;
+
+    var newContext = new PubCOntext();
+    //newContext.Books.Update(author.Books[0]);
+    newContext.Entry(author.Books[0]).State = EntityState.Modified;
+    var state = newContext.ChangeTracker.DebugView.ShortView;
+    newContext.SaveChanges();
+}
+
+void ModifyingRelatedDataWhenTracked()
+{
+    var author = context.Authors.Include(a => a.Books)
+        .FirstOrDefault(a => a.AuthorId == 5);
+
+    //author.Books[0].BasePrice = (decimal)10.00;
+    author.Books.Remove(author.Books[1]);
+    context.ChangeTracker.DetectChanges();
+    var state = context.ChangeTracker.DebugView.ShortView;
+}
+
+
+void FilterUsingRelatedData()
+{
+    var recentAuthors = context.Authors.Where(a => a.Books.Any(b => b.PublishDate.Year >= 2015)).ToList();
+}
+
+void LazyLoadBooksFromAnAuthor()
+{
+    //requires lazy loading to be set up in your app
+    var author = context.Authors.FirstOrDefault(x => x.LastName == "Howey");
+
+    foreach (var book in author.Books)
+    {
+        Console.WriteLine(book.Title);
+    }
+}
+
+void ExplicitLoadCollection()
+{
+    var author = context.Authors.FirstOrDefault(a => a.LastName == "Howey");
+    context.Entry(author).Collection(a => a.Books).Load();
+}
+
+void Projection()
+{
+    var unkwonTypes = context.Authors
+        .Select(a => new
+        {
+            AuthorId = a.AuthorId,
+            Name = a.FirstName.First() + "" + a.LastName,
+            Books = a.Books.Where(b => b.PublishDate.Year < 2000).Count(),
+        }).ToList();
+}
 void EagerLoadBooksWithAuthors()
 {
     var pubDateStart = new DateTime(2010, 1, 1);
