@@ -10,8 +10,9 @@ namespace PublisherData
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=433571323T5SL; Initial Catalog = PubDatabase; User Id = tmaxnoda; Password=tmaxnoda123@");
-                        
+            optionsBuilder.UseSqlServer("Data Source=433571323T5SL; Initial Catalog = PubDatabase; User Id = tmaxnoda; Password=tmaxnoda123@")
+                .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, Microsoft.Extensions.Logging.LogLevel.Information);
+                //.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

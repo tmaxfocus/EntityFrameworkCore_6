@@ -26,7 +26,21 @@ var context = new PubCOntext();
 //InsertMultipleAuthors();
 //BulkUpdates();
 
+EagerLoadBooksWithAuthors();
 
+void EagerLoadBooksWithAuthors()
+{
+    var pubDateStart = new DateTime(2010, 1, 1);
+    var author = context.Authors.Include(x => x.Books
+    .Where(b => b.PublishDate >= pubDateStart)
+    .OrderBy(b => b.Title)).ToList();
+
+    author.ForEach(a =>
+    {
+        Console.WriteLine($"{a.LastName} ({a.Books.Count})");
+        a.Books.ForEach(b => Console.WriteLine("  " + b.Title));
+    });
+}
 
 
 void BulkUpdates()
